@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 	"os"
+	"strings"
 )
 
 func StartServer() {
@@ -30,6 +32,22 @@ func StartServer() {
 
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
+
+	reader := bufio.NewReader(conn)
+
+	requestLine, err := reader.ReadString('\n')
+
+	if err != nil {
+		return // ?
+	}
+
+	parts := strings.Fields(requestLine)
+
+	if parts[2] != "HTTP/1.0" {
+		response := "HTTP/1.0 400 Bad Request\r\n\r\n"
+		_, _ = conn.Write([]byte(response))
+		return
+	}
 
 	response := "HTTP/1.0 200 OK\r\n\r\n"
 

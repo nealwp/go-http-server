@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-func sendMockRequest(conn net.Conn) {
+func sendMockRequest(conn net.Conn, request string) {
 	defer conn.Close()
 
 	writer := bufio.NewWriter(conn)
-	_, _ = writer.WriteString("GET / HTTP/1.0\r\n\r\n")
+	_, _ = writer.WriteString(request)
 	_ = writer.Flush()
 }
 
@@ -37,7 +37,7 @@ func TestHandleConnection(t *testing.T) {
 	t.Run("should respond to client", func(t *testing.T) {
 		client, server := net.Pipe()
 
-		go sendMockRequest(client)
+		go sendMockRequest(client, "GET / HTTP/1.0\r\n\r\n")
 
 		go handleConnection(server)
 
@@ -50,6 +50,28 @@ func TestHandleConnection(t *testing.T) {
 		}
 
 		expectedStatus := "HTTP/1.0 200 OK\r\n"
+
+		if statusLine != expectedStatus {
+			t.Fatalf("expected %s, got %s", expectedStatus, statusLine)
+		}
+	})
+
+	t.Run("should reject requests without HTTP/1.0 header", func(t *testing.T) {
+		client, server := net.Pipe()
+
+		go sendMockRequest(client, "GET / HTTP/1.1\r\n\r\n")
+
+		go handleConnection(server)
+
+		reader := bufio.NewReader(client)
+
+		statusLine, err := reader.ReadString('\n')
+
+		if err != nil {
+			t.Fatal("could not read status from response")
+		}
+
+		expectedStatus := "HTTP/1.0 400 Bad Request\r\n"
 
 		if statusLine != expectedStatus {
 			t.Fatalf("expected %s, got %s", expectedStatus, statusLine)
