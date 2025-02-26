@@ -7,11 +7,15 @@ import (
 	"time"
 )
 
+func formatRequest(request string) string {
+	return request + "\r\n\r\n"
+}
+
 func sendMockRequest(conn net.Conn, request string) {
 	defer conn.Close()
 
 	writer := bufio.NewWriter(conn)
-	_, _ = writer.WriteString(request)
+	_, _ = writer.WriteString(formatRequest(request))
 	_ = writer.Flush()
 }
 
@@ -37,7 +41,7 @@ func TestHandleConnection(t *testing.T) {
 	t.Run("should respond to client", func(t *testing.T) {
 		client, server := net.Pipe()
 
-		go sendMockRequest(client, "GET / HTTP/1.0\r\n\r\n")
+		go sendMockRequest(client, "GET / HTTP/1.0")
 
 		go handleConnection(server)
 
@@ -59,7 +63,7 @@ func TestHandleConnection(t *testing.T) {
 	t.Run("should reject requests without HTTP/1.0 header", func(t *testing.T) {
 		client, server := net.Pipe()
 
-		go sendMockRequest(client, "GET / HTTP/1.1\r\n\r\n")
+		go sendMockRequest(client, "GET / HTTP/1.1")
 
 		go handleConnection(server)
 
