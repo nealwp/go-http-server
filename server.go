@@ -49,6 +49,12 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 
+	if parts[0] != "GET" {
+		response := "HTTP/1.0 501 Not Implemented\r\n\r\n"
+		_, _ = conn.Write([]byte(response))
+		return
+	}
+
 	response := "HTTP/1.0 200 OK\r\n\r\n"
 
 	_, _ = conn.Write([]byte(response))
