@@ -43,44 +43,34 @@ func TestStartServer(t *testing.T) {
 
 }
 
+type testCase struct {
+	request  string
+	expected string
+}
+
 func TestHandleConnection(t *testing.T) {
 	t.Run("should respond to client", func(t *testing.T) {
-		client, server := net.Pipe()
 
-		go sendMockRequest(client, "GET / HTTP/1.0")
-
-		go handleConnection(server)
-
-		response, err := parseResponse(client)
-
-		if err != nil {
-			t.Fatal("could not read status from response")
+		testCases := []testCase{
+			{request: "GET / HTTP/1.0", expected: "HTTP/1.0 200 OK\r\n"},
+			{request: "GET / HTTP/1.1", expected: "HTTP/1.0 400 Bad Request\r\n"},
 		}
 
-		expectedStatus := "HTTP/1.0 200 OK\r\n"
+		for _, test := range testCases {
+			client, server := net.Pipe()
 
-		if response != expectedStatus {
-			t.Fatalf("expected %s, got %s", expectedStatus, response)
-		}
-	})
+			go sendMockRequest(client, test.request)
+			go handleConnection(server)
 
-	t.Run("should reject requests without HTTP/1.0 header", func(t *testing.T) {
-		client, server := net.Pipe()
+			response, err := parseResponse(client)
 
-		go sendMockRequest(client, "GET / HTTP/1.1")
+			if err != nil {
+				t.Fatal("could not read status from response")
+			}
 
-		go handleConnection(server)
-
-		response, err := parseResponse(client)
-
-		if err != nil {
-			t.Fatal("could not read status from response")
-		}
-
-		expectedStatus := "HTTP/1.0 400 Bad Request\r\n"
-
-		if response != expectedStatus {
-			t.Fatalf("expected %s, got %s", expectedStatus, response)
+			if response != test.expected {
+				t.Fatalf("expected %s, got %s", test.expected, response)
+			}
 		}
 	})
 }
