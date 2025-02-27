@@ -54,6 +54,7 @@ func TestHandleConnection(t *testing.T) {
 		testCases := []testCase{
 			{request: "GET / HTTP/1.0", expected: "HTTP/1.0 200 OK\r\n"},
 			{request: "GET / HTTP/1.1", expected: "HTTP/1.0 400 Bad Request\r\n"},
+			{request: "foobar", expected: "HTTP/1.0 400 Bad Request\r\n"},
 		}
 
 		for _, test := range testCases {

@@ -43,7 +43,7 @@ func handleConnection(conn net.Conn) {
 
 	parts := strings.Fields(requestLine)
 
-	if parts[2] != "HTTP/1.0" {
+	if len(parts) < 3 || parts[2] != "HTTP/1.0" {
 		response := "HTTP/1.0 400 Bad Request\r\n\r\n"
 		_, _ = conn.Write([]byte(response))
 		return
