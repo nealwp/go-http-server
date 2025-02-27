@@ -40,7 +40,6 @@ func TestStartServer(t *testing.T) {
 		}
 		defer conn.Close()
 	})
-
 }
 
 type testCase struct {
@@ -75,6 +74,22 @@ func TestHandleConnection(t *testing.T) {
 			if response != test.expected {
 				t.Fatalf("expected %s, got %s", test.expected, response)
 			}
+		}
+	})
+
+	t.Run("should close the connection after request", func(t *testing.T) {
+		client, server := net.Pipe()
+
+		go sendMockRequest(client, "GET / HTTP/1.0")
+
+		handleConnection(server)
+
+		buf := make([]byte, 1)
+
+		_, err := client.Read(buf)
+
+		if err == nil {
+			t.Fatal("connection was not closed")
 		}
 	})
 }
