@@ -19,6 +19,12 @@ func sendMockRequest(conn net.Conn, request string) {
 	_ = writer.Flush()
 }
 
+func parseResponse(client net.Conn) (string, error) {
+	reader := bufio.NewReader(client)
+	statusLine, err := reader.ReadString('\n')
+	return statusLine, err
+}
+
 func TestStartServer(t *testing.T) {
 
 	go func() {
@@ -45,9 +51,7 @@ func TestHandleConnection(t *testing.T) {
 
 		go handleConnection(server)
 
-		reader := bufio.NewReader(client)
-
-		statusLine, err := reader.ReadString('\n')
+		response, err := parseResponse(client)
 
 		if err != nil {
 			t.Fatal("could not read status from response")
@@ -55,8 +59,8 @@ func TestHandleConnection(t *testing.T) {
 
 		expectedStatus := "HTTP/1.0 200 OK\r\n"
 
-		if statusLine != expectedStatus {
-			t.Fatalf("expected %s, got %s", expectedStatus, statusLine)
+		if response != expectedStatus {
+			t.Fatalf("expected %s, got %s", expectedStatus, response)
 		}
 	})
 
@@ -67,9 +71,7 @@ func TestHandleConnection(t *testing.T) {
 
 		go handleConnection(server)
 
-		reader := bufio.NewReader(client)
-
-		statusLine, err := reader.ReadString('\n')
+		response, err := parseResponse(client)
 
 		if err != nil {
 			t.Fatal("could not read status from response")
@@ -77,8 +79,8 @@ func TestHandleConnection(t *testing.T) {
 
 		expectedStatus := "HTTP/1.0 400 Bad Request\r\n"
 
-		if statusLine != expectedStatus {
-			t.Fatalf("expected %s, got %s", expectedStatus, statusLine)
+		if response != expectedStatus {
+			t.Fatalf("expected %s, got %s", expectedStatus, response)
 		}
 	})
 }
