@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -31,6 +32,8 @@ func StartServer() {
 }
 
 func handleConnection(conn net.Conn) {
+	allowedMethods := []string{"GET", "POST", "HEAD"}
+
 	defer conn.Close()
 
 	reader := bufio.NewReader(conn)
@@ -49,7 +52,9 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 
-	if parts[0] != "GET" {
+	requestMethod := parts[0]
+
+	if !slices.Contains(allowedMethods, requestMethod) {
 		response := "HTTP/1.0 501 Not Implemented\r\n\r\n"
 		_, _ = conn.Write([]byte(response))
 		return

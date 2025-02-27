@@ -53,6 +53,8 @@ func TestHandleConnection(t *testing.T) {
 
 		testCases := []testCase{
 			{request: "GET / HTTP/1.0", expected: "HTTP/1.0 200 OK\r\n"},
+			{request: "POST / HTTP/1.0", expected: "HTTP/1.0 200 OK\r\n"},
+			{request: "HEAD / HTTP/1.0", expected: "HTTP/1.0 200 OK\r\n"},
 			{request: "GET / HTTP/1.1", expected: "HTTP/1.0 400 Bad Request\r\n"},
 			{request: "foobar", expected: "HTTP/1.0 400 Bad Request\r\n"},
 			{request: "PUT / HTTP/1.0", expected: "HTTP/1.0 501 Not Implemented\r\n"},
@@ -67,7 +69,7 @@ func TestHandleConnection(t *testing.T) {
 			response, err := parseResponse(client)
 
 			if err != nil {
-				t.Fatal("could not read status from response")
+				t.Fatal("could not read status from response", err.Error())
 			}
 
 			if response != test.expected {
