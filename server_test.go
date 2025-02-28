@@ -51,12 +51,18 @@ func TestHandleConnection(t *testing.T) {
 	t.Run("should respond to client", func(t *testing.T) {
 
 		testCases := []testCase{
+			// available methods
 			{request: "GET / HTTP/1.0", expected: "HTTP/1.0 200 OK\r\n"},
-			{request: "POST / HTTP/1.0", expected: "HTTP/1.0 200 OK\r\n"},
+			{request: "POST / HTTP/1.0\r\nContent-Length: 0", expected: "HTTP/1.0 200 OK\r\n"},
 			{request: "HEAD / HTTP/1.0", expected: "HTTP/1.0 200 OK\r\n"},
+			// unsupported version
 			{request: "GET / HTTP/1.1", expected: "HTTP/1.0 400 Bad Request\r\n"},
+			// invalid request
 			{request: "foobar", expected: "HTTP/1.0 400 Bad Request\r\n"},
+			// method not in HTTP 1.0
 			{request: "PUT / HTTP/1.0", expected: "HTTP/1.0 501 Not Implemented\r\n"},
+			// post request without content length
+			{request: "POST / HTTP/1.0", expected: "HTTP/1.0 400 Bad Request\r\n"},
 		}
 
 		for _, test := range testCases {
