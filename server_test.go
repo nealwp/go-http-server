@@ -99,3 +99,24 @@ func TestHandleConnection(t *testing.T) {
 		}
 	})
 }
+
+func TestValidateRequest(t *testing.T) {
+
+	tests := []struct {
+		name     string
+		request  string
+		expected bool
+	}{
+		{name: "missing method", request: formatRequest("/ HTTP/1.0"), expected: false},
+		{name: "empty request", request: formatRequest(""), expected: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			isValid := isValidRequest(tt.request)
+			if isValid != tt.expected {
+				t.Errorf("Expected error: %v, got: %v", tt.expected, isValid)
+			}
+		})
+	}
+}

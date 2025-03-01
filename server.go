@@ -80,3 +80,10 @@ func handleConnection(conn net.Conn) {
 	_, _ = conn.Write([]byte(response))
 
 }
+
+func isValidRequest(request string) bool {
+	if request == "" {
+		return false
+	}
+	return false
+}
