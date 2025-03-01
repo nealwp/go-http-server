@@ -60,6 +60,21 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 
+	if requestMethod == "POST" {
+		header, err := reader.ReadString('\n')
+
+		if err != nil {
+			return // ?
+		}
+
+		if !strings.Contains(header, "Content-Length:") {
+			response := "HTTP/1.0 400 Bad Request\r\n\r\n"
+			_, _ = conn.Write([]byte(response))
+			return
+		}
+
+	}
+
 	response := "HTTP/1.0 200 OK\r\n\r\n"
 
 	_, _ = conn.Write([]byte(response))
